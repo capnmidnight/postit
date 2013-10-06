@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script type="text/javascript">
+		function start()
+		{
+			var framesPerSecond = 30;
+			var secondsPerImage = 12;
+			var frameWidth = screen.width;
+			var frameHeight = screen.height;
+			var displayScreenDPI = 84;
+			var noteDim = 6; // inches
+			var framesPerImage = framesPerSecond * secondsPerImage;
+			var imageDim = displayScreenDPI * noteDim;
+			var gutterWidth = displayScreenDPI * 0.5;
+			var imageTop = (frameHeight - imageDim) / 2;
+			var pixelDistance = imageDim + gutterWidth;
+			var pixelSpeed = pixelDistance / framesPerImage;
+			// + 1 is for the last few frames where the left-most image is almost off-screen,
+			// leaving the next N images as if there were no first image.
+			var notesPerFrame = Math.ceil(frameWidth / imageDim) + 1;
+
+			var container = document.getElementById("container");
+			container.style.position = "absolute";
+			container.style.left = "0px";
+			container.style.top = "0px";
+			container.style.width = frameWidth + "px";
+			container.style.height = frameHeight + "px";
+			container.style.overflow = "hidden";
+			var button = document.getElementById("startButton");
+			container.removeChild(button);
+			var images = new Array(notesPerFrame);
+			for(var i = 0; i < notesPerFrame; ++i)
+			{
+				var image = document.createElement("img");
+				container.appendChild(image);
+				image.style.position = "absolute";
+				image.style.width = imageDim + "px";
+				image.style.height = imageDim + "px";
+				image.style.top = imageTop + "px";
+				image.style.left = Math.round(pixelDistance * i) + "px";
+				image.src = makeFileName(i);
+				images[i] = image;
+			}
+
+			var curFrame = 0;
+			var curImage = 0;
+			function draw()
+			{
+				curFrame++;
+				var x = curFrame % framesPerImage;
+				for(var i = 0; i < notesPerFrame; ++i)
+				{
+					var left = i * pixelDistance - x * pixelSpeed;
+					images[i].style.left = Math.round(left) + "px";
+				}
+				if(x == 0)
+				{
+					curImage ++;
+					for(var i = 0; i < notesPerFrame; ++i)
+					{
+						var n = (curImage + i) % 425;
+						images[i].src = makeFileName(n);
+					}
+				}
+			}
+			setInterval(draw, 33);
+		}
+
+		function makeFileName(n)
+		{
+			var str = n + ".jpg";
+			if(n < 10)
+				str = "0" + str;
+			if(n < 100)
+				str = "0" + str;
+			return "file" + str;	
+		}
+	    
+		</script>
+	</head>
+	<body style="background-color:black">
+		<div id="container">
+			<button onclick="start()" id="startButton">Go</button>
+		</div>
+	</body>
+</html>
